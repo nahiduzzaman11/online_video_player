@@ -43,6 +43,7 @@ dependencies:
   intl:
   flutter_svg:
   video_player:
+  shared_preferences:
 
 dev_dependencies:
   flutter_test:
