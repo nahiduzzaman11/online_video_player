@@ -21,6 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return SafeArea(
       top: false,
       child: Scaffold(
+        extendBody: true,
         backgroundColor: AppColors.surface,
         appBar: AppBar(
           backgroundColor: AppColors.surface,
@@ -42,7 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
             itemBuilder: (context, index) {
               return GestureDetector(
                 onTap: () {
-                  Get.toNamed(AppRoute.videoPlay);
+                  Get.toNamed(AppRoute.onlineVideoPlay);
                 },
                 child: Container(
                   color: AppColors.white,
