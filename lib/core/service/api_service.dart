@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
   SharedPreferences sharedPreferences;
+
   ApiService({required this.sharedPreferences});
 
   Future<ApiResponseModel> request(
@@ -18,21 +19,7 @@ class ApiService {
     http.Response response;
 
     try {
-
-      if (method == ApiResponseMethod.getMethod) {
-        if (passHeader) {
-          initToken();
-          response = await http.get(url, headers: {
-            "Content-Type": "application/json",
-            "Authorization": "$tokenType $token",
-          });
-        }
-        else {
-          response = await http.get(url);
-        }
-      }
-
-      else {
+      if (method == ApiResponseMethod.postMethod) {
         if (passHeader) {
           initToken();
           var body= jsonEncode(params);
@@ -45,6 +32,17 @@ class ApiService {
           response = await http.post(url, body: params);
         }
       }
+      else {
+        if (passHeader) {
+          initToken();
+          response = await http.get(url, headers: {
+            "Content-Type": "application/json",
+            "Authorization": "$tokenType $token",
+          });
+        } else {
+          response = await http.get(url);
+        }
+      }
 
       if (kDebugMode) {
         print(url.toString());
@@ -55,20 +53,16 @@ class ApiService {
 
       if (response.statusCode == 200) {
         return ApiResponseModel(200, 'Success', response.body);
-      }
-      else if (response.statusCode == 401) {
+      } else if (response.statusCode == 401) {
         return ApiResponseModel(401, "Unauthorized".tr, response.body);
-      }
-      else if (response.statusCode == 201) {
+      } else if (response.statusCode == 201) {
         return ApiResponseModel(201, 'Success', response.body);
-      }
-      else if (response.statusCode == 500) {
+      } else if (response.statusCode == 500) {
         return ApiResponseModel(500, "Internal Server Error".tr, response.body);
-      }
-      else {
+      } else {
         return ApiResponseModel(499, "Something went wrong".tr, response.body);
       }
-    }catch (e) {
+    } catch (e) {
       return ApiResponseModel(499, "Client Closed Request".tr, '');
     }
   }
@@ -78,10 +72,8 @@ class ApiService {
 
   initToken() {
     if (sharedPreferences.containsKey(SharedPreferenceHelper.accessTokenKey)) {
-      String? t =
-      sharedPreferences.getString(SharedPreferenceHelper.accessTokenKey);
-      String? tType =
-      sharedPreferences.getString(SharedPreferenceHelper.accessTokenType);
+      String? t = sharedPreferences.getString(SharedPreferenceHelper.accessTokenKey);
+      String? tType = sharedPreferences.getString(SharedPreferenceHelper.accessTokenType);
       token = t ?? '';
       tokenType = tType ?? 'Bearer';
     } else {
