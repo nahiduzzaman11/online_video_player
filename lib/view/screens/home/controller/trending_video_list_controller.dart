@@ -11,20 +11,27 @@ class TrendingVideoListController extends GetxController {
   TrendingVideoListController({required this.trendingVideoRepo});
 
   bool isLoading = false;
-
+  List<Result> result = [];
   TextEditingController searchController = TextEditingController();
   TrendingVideoModel trendingVideoModel = TrendingVideoModel();
 
-  Future<void> fetchVideoList() async {
+  Future<void> fetchVideoList({String ? pageNo = "1"}) async {
 
     isLoading = true;
     update();
-    ApiResponseModel responseModel = await trendingVideoRepo.fetchVideoList();
+    ApiResponseModel responseModel = await trendingVideoRepo.fetchVideoList(pageNo: pageNo);
     if (responseModel.statusCode == 200) {
       trendingVideoModel = TrendingVideoModel.fromJson(jsonDecode(responseModel.responseJson));
+      result = [];
+      trendingVideoModel.results?.forEach((element) {
+        if(element.title != null){
+          result.add(element);
+        }
+      });
       debugPrint("${responseModel.statusCode}");
       isLoading = false;
       update();
+      debugPrint("The data----------------------${result.length}");
     }
     else{
       debugPrint("${responseModel.statusCode}, ${responseModel.message}");
@@ -33,9 +40,4 @@ class TrendingVideoListController extends GetxController {
     update();
   }
 
-  @override
-  void onInit() {
-    fetchVideoList();
-    super.onInit();
-  }
 }

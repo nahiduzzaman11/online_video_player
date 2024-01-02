@@ -24,9 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
     Get.put(ApiService(sharedPreferences: Get.find()));
     Get.put(TrendingVideoRepo(apiService: Get.find()));
     var controller = Get.put(TrendingVideoListController(trendingVideoRepo: Get.find()));
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      controller.fetchVideoList();
-    });
+    controller.fetchVideoList();
     super.initState();
   }
 
@@ -50,90 +48,127 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         body: GetBuilder<TrendingVideoListController>(
           builder: (controller) {
-            if(controller.isLoading){
+            if(controller.isLoading == true){
               const Center(child: CircularProgressIndicator());
             }
-            return SingleChildScrollView(
+            return Padding(
               padding: EdgeInsets.symmetric(horizontal: 20.w),
-              physics: const BouncingScrollPhysics(),
               child: ListView.builder(
                 shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: controller.trendingVideoModel.results?.length,
+                physics: const BouncingScrollPhysics(),
+                itemCount: controller.result.length + 1,
                 itemBuilder: (context, index) {
-                  return GestureDetector(
-                    onTap: () {
-                      Get.toNamed(AppRoute.onlineVideoPlay);
-                    },
-                    child: Container(
-                      color: AppColors.white,
-                      margin: EdgeInsets.only(bottom: 18.h),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            height: 190,
-                            width: MediaQuery.of(context).size.width,
-                            decoration: BoxDecoration(
-                                image: DecorationImage(image: CachedNetworkImageProvider("${controller.trendingVideoModel.results?[index].thumbnail}"),fit: BoxFit.fill)
-                            ),
-                            child: Align(
-                              alignment: Alignment.bottomRight,
-                              child: Container(
-                                padding: EdgeInsets.symmetric(horizontal: 4.w),
-                                margin: EdgeInsets.only(right: 8.w,bottom: 8.h),
-                                decoration: BoxDecoration(
-                                  color: AppColors.black,
-                                  borderRadius: BorderRadius.circular(4.r),
-                                ),child: CustomText(text: "${controller.trendingVideoModel.results?[index].duration}",fontSize: 12.spMin,color: AppColors.white,fontWeight: FontWeight.w500),
+                  if(index != controller.result.length){
+                    return GestureDetector(
+                      onTap: () {
+                        Get.toNamed(AppRoute.onlineVideoPlay,arguments: [controller.result, index]);
+                      },
+                      child: Container(
+                        color: AppColors.white,
+                        margin: EdgeInsets.only(bottom: 18.h),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              height: 190,
+                              width: MediaQuery.of(context).size.width,
+                              decoration: BoxDecoration(
+                                  image: DecorationImage(image: CachedNetworkImageProvider("${controller.result[index].thumbnail}"),fit: BoxFit.fill)
+                              ),
+                              child: Align(
+                                alignment: Alignment.bottomRight,
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(horizontal: 4.w),
+                                  margin: EdgeInsets.only(right: 8.w,bottom: 8.h),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.black,
+                                    borderRadius: BorderRadius.circular(4.r),
+                                  ),child: CustomText(text: "${controller.result[index].duration}",fontSize: 12.spMin,color: AppColors.white,fontWeight: FontWeight.w500),
+                                ),
                               ),
                             ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 16,right: 8,top: 16,bottom: 16),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Container(
-                                  height: 40,width: 40,
-                                  margin: const EdgeInsets.only(right: 12),
-                                  decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      image: DecorationImage(image:
-                                      CachedNetworkImageProvider("${controller.trendingVideoModel.results?[index].channelImage}"),
-                                          fit: BoxFit.fill)
+                            Padding(
+                              padding: const EdgeInsets.only(left: 16,right: 8,top: 16,bottom: 16),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Container(
+                                    height: 40,width: 40,
+                                    margin: const EdgeInsets.only(right: 12),
+                                    decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        image: DecorationImage(image:
+                                        CachedNetworkImageProvider("${controller.result[index].channelImage}"),
+                                            fit: BoxFit.fill)
+                                    ),
                                   ),
-                                ),
-                                Flexible(
-                                  child: Row(
-                                    children: [
-                                      Flexible(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            CustomText(text: "${controller.trendingVideoModel.results?[index].title}",maxLines: 2,textAlign: TextAlign.start,title: true,color: AppColors.black,fontSize: 14.spMin),
-                                            Row(
-                                              children: [
-                                                CustomText(text: "${controller.trendingVideoModel.results?[index].viewers} views",color: AppColors.gray600,fontSize: 12.spMin),
-                                                CustomText(text: ".",color: AppColors.gray600,fontSize: 12.spMin,left: 4.w,right: 4.w),
-                                                CustomText(text: DateConverter.convertToString("${controller.trendingVideoModel.results?[index].createdAt}"),color: AppColors.gray600,fontSize: 12.spMin),
-                                              ],
-                                            ),
-                                          ],
+                                  Flexible(
+                                    child: Row(
+                                      children: [
+                                        Flexible(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              CustomText(text: "${controller.result[index].title}",maxLines: 2,textAlign: TextAlign.start,title: true,color: AppColors.black,fontSize: 14.spMin),
+                                              Row(
+                                                children: [
+                                                  CustomText(text: "${controller.result[index].viewers} views",color: AppColors.gray600,fontSize: 12.spMin),
+                                                  CustomText(text: ".",color: AppColors.gray600,fontSize: 12.spMin,left: 4.w,right: 4.w),
+                                                  CustomText(text: DateConverter.convertToString("${controller.result[index].dateAndTime}"),color: AppColors.gray600,fontSize: 12.spMin),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
                                         ),
-                                      ),
-                                      Icon(Icons.more_vert_rounded,size: 24.h,color: AppColors.gray400)
-                                    ],
+                                        Icon(Icons.more_vert_rounded,size: 24.h,color: AppColors.gray400)
+                                      ],
+                                    ),
                                   ),
-                                ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }else{
+                    return Padding(
+                      padding: EdgeInsets.only(top: 12.h,bottom: 24.h),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: controller.trendingVideoModel.links?.previous == null
+                            ? CrossAxisAlignment.end : controller.trendingVideoModel.links?.next == null
+                            ? CrossAxisAlignment.start : CrossAxisAlignment.end,
+                        children: [
+                          controller.trendingVideoModel.links?.previous != null
+                          ? GestureDetector(
+                            onTap: () {
+                              controller.fetchVideoList(pageNo: "${controller.trendingVideoModel.links?.previous}");
+                            },
+                            child: Row(
+                              children: [
+                                Icon(Icons.arrow_back_ios,size: 12.h,color: AppColors.gray600),
+                                CustomText(text: "Previous".tr,fontSize: 14.spMin,fontWeight: FontWeight.w500,left: 4.w),
                               ],
                             ),
-                          ),
+                          ) : const SizedBox(),
+                          controller.trendingVideoModel.links?.next != null
+                          ? GestureDetector(
+                            onTap: () {
+                              controller.fetchVideoList(pageNo: "${controller.trendingVideoModel.links?.next}");
+                            },
+                            child: Row(
+                              children: [
+                                CustomText(text: "Next Page".tr,fontSize: 14.spMin,fontWeight: FontWeight.w500,right: 4.w),
+                                Icon(Icons.arrow_forward_ios,size: 12.h,color: AppColors.gray600),
+                              ],
+                            ),
+                          ) : const SizedBox(),
                         ],
                       ),
-                    ),
-                  );
+                    );
+                  }
                 },
               ),
             );

@@ -19,7 +19,18 @@ class ApiService {
     http.Response response;
 
     try {
-      if (method == ApiResponseMethod.postMethod) {
+      if (method == ApiResponseMethod.getMethod) {
+        if (passHeader) {
+          initToken();
+          response = await http.get(url, headers: {
+            "Content-Type": "application/json",
+            "Authorization": "$tokenType $token",
+          });
+        } else {
+          response = await http.get(url);
+        }
+      }
+      else {
         if (passHeader) {
           initToken();
           var body= jsonEncode(params);
@@ -30,17 +41,6 @@ class ApiService {
           });
         } else {
           response = await http.post(url, body: params);
-        }
-      }
-      else {
-        if (passHeader) {
-          initToken();
-          response = await http.get(url, headers: {
-            "Content-Type": "application/json",
-            "Authorization": "$tokenType $token",
-          });
-        } else {
-          response = await http.get(url);
         }
       }
 

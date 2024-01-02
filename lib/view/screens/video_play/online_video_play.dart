@@ -4,11 +4,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:online_video_player/core/helper/date_converter_helper.dart';
 import 'package:online_video_player/utils/app_colors.dart';
+import 'package:online_video_player/view/screens/home/model/trending_video_model.dart';
 import 'package:online_video_player/view/screens/video_play/inner_widgets/comment_section.dart';
 import 'package:online_video_player/view/screens/video_play/inner_widgets/likes_section.dart';
 import 'package:online_video_player/view/widgets/custom_text/custom_text.dart';
 import 'package:video_player/video_player.dart';
-
 
 class OnlineVideoPlay extends StatefulWidget {
   const OnlineVideoPlay({super.key});
@@ -18,14 +18,18 @@ class OnlineVideoPlay extends StatefulWidget {
 }
 
 class _VideoPlayState extends State<OnlineVideoPlay> {
-  final videoURL = "https://bycwknztmq.gpcdn.net/a80b4d4e-b023-4ad8-8ed7-7671f6b3018b/playlist.m3u8";
   late VideoPlayerController videoPlayerController;
+
+  List<Result> result = Get.arguments[0];
+  int index = Get.arguments[1];
 
   @override
   void initState() {
-    videoPlayerController = VideoPlayerController.networkUrl(Uri(path: videoURL))..initialize().then((value) {
-      setState(() {});
-    });
+    videoPlayerController =
+        VideoPlayerController.network("${result[index].manifest}")
+          ..initialize().then((value) {
+            setState(() {});
+          });
     super.initState();
   }
 
@@ -50,15 +54,112 @@ class _VideoPlayState extends State<OnlineVideoPlay> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               videoPlayerController.value.isInitialized
-                  ? AspectRatio(aspectRatio: videoPlayerController.value.aspectRatio,child: VideoPlayer(videoPlayerController))
-                  : const SizedBox(),
+                  ? AspectRatio(
+                      aspectRatio: videoPlayerController.value.aspectRatio,
+                      child: Stack(
+                        children: [
+                          VideoPlayer(videoPlayerController),
+                          videoPlayerController.value.isPlaying != true
+                          ? Align(
+                            alignment: Alignment.center,
+                            child: GestureDetector(
+                              onTap: () => videoPlayerController.play(),
+                              child: Icon(Icons.play_arrow, color: AppColors.rgb, size: 100.h),
+                            ),
+                          )
+                          : const SizedBox(),
+                          Align(
+                            alignment: Alignment.bottomRight,
+                            child: Container(
+                              padding:
+                                  EdgeInsets.symmetric(horizontal: 4.w),
+                              margin:
+                                  EdgeInsets.only(right: 8.w, bottom: 8.h),
+                              decoration: BoxDecoration(
+                                color: AppColors.black,
+                                borderRadius: BorderRadius.circular(4.r),
+                              ),
+                              child: CustomText(
+                                  text: "${result[index].duration}",
+                                  fontSize: 12.spMin,
+                                  color: AppColors.white,
+                                  fontWeight: FontWeight.w500),
+                            ),
+                          ),
+                          Align(
+                            alignment: Alignment.topLeft,
+                            child: GestureDetector(
+                              onTap: () => Get.back(),
+                              child: Container(
+                                width: 32.w,
+                                height: 32.h,
+                                padding: EdgeInsets.symmetric(horizontal: 4.w),
+                                margin: EdgeInsets.only(left: 12.w, top: 12.h),
+                                decoration: BoxDecoration(
+                                  color: AppColors.rgb,
+                                  borderRadius: BorderRadius.circular(4.r),
+                                ),
+                                child: const Icon(Icons.arrow_back_outlined, color: AppColors.white),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : Container(
+                      height: 190,
+                      width: MediaQuery.of(context).size.width,
+                      decoration: BoxDecoration(
+                          image: DecorationImage(
+                              image: CachedNetworkImageProvider(
+                                  "${result[index].thumbnail}"),
+                              fit: BoxFit.fill)),
+                      child: Stack(
+                        children: [
+                          Align(
+                            alignment: Alignment.bottomRight,
+                            child: Container(
+                              padding: EdgeInsets.symmetric(horizontal: 4.w),
+                              margin: EdgeInsets.only(right: 8.w, bottom: 8.h),
+                              decoration: BoxDecoration(
+                                color: AppColors.black,
+                                borderRadius: BorderRadius.circular(4.r),
+                              ),
+                              child: CustomText(
+                                  text: "${result[index].duration}",
+                                  fontSize: 12.spMin,
+                                  color: AppColors.white,
+                                  fontWeight: FontWeight.w500),
+                            ),
+                          ),
+                          Align(
+                            alignment: Alignment.topLeft,
+                            child: GestureDetector(
+                              onTap: () => Get.back(),
+                              child: Container(
+                                width: 32.w,
+                                height: 32.h,
+                                padding: EdgeInsets.symmetric(horizontal: 4.w),
+                                margin: EdgeInsets.only(left: 12.w, top: 12.h),
+                                decoration: BoxDecoration(
+                                  color: AppColors.rgb,
+                                  borderRadius: BorderRadius.circular(4.r),
+                                ),
+                                child: const Icon(Icons.arrow_back_outlined,
+                                    color: AppColors.white),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 20.w),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     CustomText(
-                      text: "আরব নেতাদের যে ভুলে ফি*লি*স্তি*নের এই দুর্দাশা | আবু ত্বহা মুহাম্মদ আদনান",
+                      text: "${result[index].title}",
                       maxLines: 2,
                       color: AppColors.gray900,
                       fontSize: 14.spMin,
@@ -71,7 +172,7 @@ class _VideoPlayState extends State<OnlineVideoPlay> {
                     Row(
                       children: [
                         CustomText(
-                            text: "40 views",
+                            text: "${result[index].viewers} views",
                             color: AppColors.gray600,
                             fontSize: 12.spMin),
                         CustomText(
@@ -81,9 +182,10 @@ class _VideoPlayState extends State<OnlineVideoPlay> {
                             left: 4.w,
                             right: 4.w),
                         CustomText(
-                            text: DateConverter.convertToString("2023-12-26T15:17:37.213619+06:00"),
-                            color: AppColors.gray600,
-                            fontSize: 12.spMin,
+                          text: DateConverter.convertToString(
+                              "${result[index].dateAndTime}"),
+                          color: AppColors.gray600,
+                          fontSize: 12.spMin,
                         ),
                       ],
                     ),
@@ -99,25 +201,27 @@ class _VideoPlayState extends State<OnlineVideoPlay> {
                                 height: 40.h,
                                 width: 40.h,
                                 margin: EdgeInsets.only(right: 8.w),
-                                decoration: const BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    image: DecorationImage(
-                                        image: CachedNetworkImageProvider("https://mahfilbucket.s3.amazonaws.com/media_test/video_content_thumbnail/mob_thumbnail_U9CYT0rvkv_1920x1080_PNG.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA5G25YRBXUVQTFY73%2F20231230%2Fap-south-1%2Fs3%2Faws4_request&X-Amz-Date=20231230T180059Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=b1ade780139f7d384ebbbe4fbfdaad470036633e8d4081287e2f2f2cb7d6a1c4"),
-                                        fit: BoxFit.fill)),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  image: DecorationImage(
+                                      image: CachedNetworkImageProvider(
+                                          "${result[index].channelImage}"),
+                                      fit: BoxFit.fill),
+                                ),
                               ),
                               Flexible(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     CustomText(
-                                      text: "Mega Bangla Tv",
+                                      text: "${result[index].channelName}",
                                       fontSize: 14.spMin,
                                       fontWeight: FontWeight.w500,
                                       color: AppColors.gray900,
                                       textAlign: TextAlign.start,
                                     ),
                                     CustomText(
-                                        text: "14 Subscribers",
+                                        text: "${result[index].channelSubscriber} Subscribers",
                                         fontSize: 12.spMin,
                                         fontWeight: FontWeight.w400,
                                         color: AppColors.gray600),
@@ -136,8 +240,7 @@ class _VideoPlayState extends State<OnlineVideoPlay> {
                               color: AppColors.blue),
                           child: Row(
                             children: [
-                              Icon(Icons.add,
-                                  size: 16.h, color: AppColors.white),
+                              Icon(Icons.add, size: 16.h, color: AppColors.white),
                               CustomText(
                                   text: "Subscribe".tr,
                                   fontSize: 12.spMin,

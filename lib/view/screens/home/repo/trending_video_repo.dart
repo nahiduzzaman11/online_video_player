@@ -8,13 +8,15 @@ class TrendingVideoRepo {
   ApiService apiService;
   TrendingVideoRepo({required this.apiService});
 
-  Future<ApiResponseModel> fetchVideoList() async {
+  Future<ApiResponseModel> fetchVideoList({String ? pageNo = "1"}) async {
 
-    String uri = "${ApiUrl.baseUrl}${ApiUrl.videoList}?page=1";
+    String uri = "${ApiUrl.baseUrl}${ApiUrl.videoList}?page=$pageNo";
     debugPrint("URl=========>>$uri");
     String requestMethod = ApiResponseMethod.getMethod;
+    debugPrint("RequestMethod===============>$requestMethod");
 
     ApiResponseModel responseModel = await apiService.request(uri, requestMethod, null);
+    debugPrint("Response============>${responseModel.responseJson}");
 
     return responseModel;
   }
